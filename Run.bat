@@ -24,7 +24,7 @@ if exist "%wtDefaultPath%" (
 :: The original code used %~dp0Win11Debloat.ps1 directly, but the path
 :: contained double spaces ("Codigos Run  Colab_n8n__local") which broke
 :: the nested quote parsing across Batch -> PowerShell -> Start-Process.
-:: The 8.3 short path (e.g. C:\Users\GAEL~1\...\WIN11D~1.PS1) has no
+:: The 8.3 short path (e.g. C:\Users\WIN11D~1.PS1) has no
 :: spaces, so it survives all quoting layers without splitting.
 :: ==================================================================
 for %%I in ("%~dp0Win11Debloat.ps1") do set "SCRIPT_PATH=%%~fsI"
