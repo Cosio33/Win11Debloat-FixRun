@@ -19,15 +19,26 @@ if exist "%wtDefaultPath%" (
     set "wtPath="
 )
 
-:: Launch script
+:: ==================================================================
+:: FIX: Resolve to short (8.3) path to avoid spaces in the directory name
+:: The original code used %~dp0Win11Debloat.ps1 directly, but the path
+:: contained double spaces ("Codigos Run  Colab_n8n__local") which broke
+:: the nested quote parsing across Batch -> PowerShell -> Start-Process.
+:: The 8.3 short path (e.g. C:\Users\GAEL~1\...\WIN11D~1.PS1) has no
+:: spaces, so it survives all quoting layers without splitting.
+:: ==================================================================
+for %%I in ("%~dp0Win11Debloat.ps1") do set "SCRIPT_PATH=%%~fsI"
+
 if defined wtPath (
     call :Log Launching Win11Debloat.ps1 with Windows Terminal...
-    PowerShell -Command "Start-Process -FilePath '%wtPath%' -ArgumentList 'PowerShell -NoProfile -ExecutionPolicy Bypass -File ""%~dp0Win11Debloat.ps1""' -Verb RunAs" >> "%logFile%" || call :Error "PowerShell command failed"
+    :: FIX: Replaced %~dp0Win11Debloat.ps1 with %SCRIPT_PATH% (no spaces)
+    PowerShell -Command "Start-Process -FilePath '%wtPath%' -ArgumentList 'PowerShell -NoProfile -ExecutionPolicy Bypass -File ""%SCRIPT_PATH%""' -Verb RunAs" >> "%logFile%" || call :Error "PowerShell command failed"
     call :Log Script execution passed successfully to Win11Debloat.ps1
 ) else (
     echo Windows Terminal not found. Using default PowerShell instead...
     call :Log Windows Terminal not found. Using default PowerShell to launch Win11Debloat.ps1...
-    PowerShell -ExecutionPolicy Bypass -Command "& {Start-Process PowerShell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""%~dp0Win11Debloat.ps1""' -Verb RunAs}" >> "%logFile%" || call :Error "PowerShell command failed"
+    :: FIX: Replaced %~dp0Win11Debloat.ps1 with %SCRIPT_PATH% (no spaces)
+    PowerShell -ExecutionPolicy Bypass -Command "& {Start-Process PowerShell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""%SCRIPT_PATH%""' -Verb RunAs}" >> "%logFile%" || call :Error "PowerShell command failed"
     call :Log Script execution passed successfully to Win11Debloat.ps1
 )
 
@@ -46,3 +57,4 @@ echo ERROR: %*
 echo Logged in %logFile%
 pause
 goto :EOF
+
